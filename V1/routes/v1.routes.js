@@ -5,7 +5,9 @@ const router = express.Router();
 
 router.get('/', getUser);
 
-router.post('/', validator.userInput, insertUser);
+router.post('/signup', insertUser);
+
+router.post('/signin', validator.userPasswordConverter);
 
 router.delete('/:id', deleteUser);
 

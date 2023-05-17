@@ -1,4 +1,6 @@
-let jsonData = require('../database/userdata.json')
+let jsonData = require('../../database/userdata.json')
+const fs = require('fs');
+const crypto = require('crypto');
 
 const getUser = (req, res) => {
     try {
@@ -12,8 +14,26 @@ const getUser = (req, res) => {
 
 const insertUser = (req, res) => {
     try {
-        jsonData.push({ id: req.body.id, username: req.body.username, password: req.body.password })
-        return res.status(200).json({ msg: "Data added successfully", data: jsonData });
+        //* first check if the ID is present or not
+        const index = jsonData.findIndex(item => req.body.id == item.id);
+        if (index != -1) {
+            return res.status(200).json({ msg: "ID is present" });
+        }
+
+        const passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
+        console.log(passwordHash);
+
+        jsonData.push({ id: req.body.id, username: req.body.username, password: passwordHash })
+
+        //* write file with inserted data
+        fs.writeFile('D:/Yudiz_Solution_Task/V1/database/userdata.json', JSON.stringify(jsonData), (err) => {
+            if (err) {
+                console.log('ERROR>>> in FS', err);
+                return res.status(200).json({ msg: "Data Not added successfully" });
+            }
+            return res.status(200).json({ msg: "Data added successfully", data: jsonData });
+        })
+
     } catch (error) {
         console.log(error);
         res.status(404).send('Insert Error');
@@ -33,8 +53,18 @@ const deleteUser = (req, res) => {
             return res.status(200).json({ msg: "Enter valid UserId" })
         }
 
-        //* return filer data
+        //* filer data
         jsonData = jsonData.filter((item) => req.params.id != item.id)
+
+        //* write file with deleted data
+        fs.writeFile('D:/Yudiz_Solution_Task/V1/database/userdata.json', JSON.stringify(jsonData), (err) => {
+            if (err) {
+                console.log('ERROR>>> in FS', err);
+                return res.status(200).json({ msg: "Data Not added successfully" });
+            }
+            return res.status(200).json({ msg: "Data added successfully", data: jsonData });
+        })
+
         res.status(200).json({ msg: "Data deleted successfully", data: jsonData });
     } catch (error) {
         console.log(error);
@@ -51,10 +81,24 @@ const updateUser = (req, res) => {
         if (index === -1) {
             return res.status(200).json({ msg: "Enter valid UserId" })
         }
-        jsonData[index].username = req.body.username
-        jsonData[index].password = req.body.password
 
-        return res.status(200).json({ msg: "Data added successfully", data: jsonData });
+        //* converted into the hash value
+        const passwordHash = crypto.createHash('sha256').update(req.body.password).digest('hex');
+        console.log(passwordHash);
+
+        jsonData[index].username = req.body.username
+        jsonData[index].password = passwordHash
+
+        //* write file with inserted data
+        fs.writeFile('D:/Yudiz_Solution_Task/V1/database/userdata.json', JSON.stringify(jsonData), (err) => {
+            if (err) {
+                console.log('ERROR>>> in FS', err);
+                return res.status(200).json({ msg: "Data Not added successfully" });
+            }
+            return res.status(200).json({ msg: "Data updated successfully", data: jsonData });
+        })
+
+
     } catch (error) {
         console.log(error);
         res.status(404).send('Insert Error');
