@@ -1,11 +1,11 @@
-const jwt = require('jsonwebtoken');
-const { messaging } = require('./messaging.utils');
-const { messages, statuscode } = require('./messages.utils');
-const config = require('../config/config');
+const jwt = require('jsonwebtoken')
+const { messaging } = require('./messaging.utils')
+const { messages, statuscode } = require('./messages.utils')
+const config = require('../config/config')
 
 const authToken = (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
+        const token = req.headers['authorization']
 
         if (!token) {
             return messaging(res, statuscode.unAuthorized, messages.unAuthorized)
@@ -18,12 +18,12 @@ const authToken = (req, res, next) => {
 
             req.decoded = decoded
 
-            next();
+            next()
         })
     } catch (error) {
-        console.log("Checktoken utils", error);
+        console.log('Checktoken utils', error)
         return messaging(res, statuscode.pageNotFound, messages.catch)
     }
 }
 
-module.exports = { authToken };
+module.exports = { authToken }

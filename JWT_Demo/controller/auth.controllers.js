@@ -1,134 +1,111 @@
-let jsonData = require('../../database/userdata.json')
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const fs = require('fs');
-const { messaging } = require('../../utils/messaging.utils');
-const { statuscode, messages } = require('../../utils/messages.utils');
-const config = require('../../config/config');
+const jwt = require('jsonwebtoken')
+const { messaging } = require('../../utils/messaging.utils')
+const { statuscode, messages } = require('../../utils/messages.utils')
+const config = require('../../config/config')
+const createHash = require('../../utils/createhash.utils')
+const Users = require('../../schemas/user.schemas')
 
 
-//######### convert password into hash ###########//
-const createHash = (password) => {
+const getUser = async (req, res) => {
     try {
-        const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
-        return passwordHash;
+        //* find all the documets from mongodb
+        const userData = await Users.find({}, { '_id': 1, 'username': 1, 'role': 1 })
+        return res.status(200).json(userData)
     } catch (error) {
-        console.log("Error in createHash");
-    }
-}
-
-const getUser = (req, res) => {
-    try {
-        res.status(200).json(jsonData);
-    } catch (error) {
-        console.log(error);
-        res.status(404).send('Getuser Error');
+        console.log(error)
+        return res.status(404).send('Getuser Error')
     }
 }
 
 //########### Update User ##########//
-const updateUser = (req, res) => {
+const updateUser = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const userId = req.decoded.id;
+        const { username, password } = req.body
+        const userId = req.decoded.id
 
-        //* check when username is already exists or not
-        const checkUsername = jsonData.find(item => item.username === username);
-        if (checkUsername) {
-            return messaging(res, statuscode.statusNotFound, messages.alreadyRegisteredUser)
-        }
-        console.log("USERID>>>>>> ", typeof userId);
-        const user = jsonData.find(item => item.id === userId);
-        console.log("USER>>>>", user);
-        if (user) {
-            user.username = username;
-            user.password = createHash(password);
-            fs.writeFileSync('D:/Yudiz_Solution_Task/database/userdata.json', JSON.stringify(jsonData))
-            return messaging(res, statuscode.statusSuccess, messages.updatedProfile);
-        } else {
-            return messaging(res, statuscode.statusNotFound, messages.invalidCredentials);
-        }
+        await Users.updateOne({ _id: userId }, 
+            { username: username, password: createHash(password) })
+                .then(() => messaging(res, statuscode.statusNotFound, 'Update successfull'))
+                .catch(err => messaging(res, statuscode.statusNotFound, err))
+
     } catch (error) {
-        console.log(error);
-        res.status(403).json({ msg: "Error in updateUser" })
+        console.log(error)
+        res.status(403).json({ msg: 'Error in updateUser' })
     }
 }
 
 //########### Sign In ############//
-const signInUser = (req, res) => {
+const signInUser = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const user = require('../../database/userdata.json').find(u => u.username === username);
-
+        const { username, password } = req.body
+        const user = await Users.findOne({ username: username })
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return messaging(res, statuscode.statusSuccess, 'User not found')
         }
-
-        const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
-
+        
+        const passwordHash = createHash(password)
         if (user.password === passwordHash) {
-            const token = jwt.sign({ id: user.id, role: user.role }, config.app.secret_key, { expiresIn: '1h' })
-            return res.status(200).json({ token });
+            const token = jwt.sign({ id: user.id, role: user.role }, config.app.secret_key, { expiresIn: config.app.expireIn })
+            return res.status(200).json({ token })
         }
-        return res.status(404).json({ msg: "Data not found!!!" })
+        return messaging(res, statuscode.statusSuccess, 'Data not found!!!')
     } catch (error) {
-        console.log(error);
-        return res.status(404).send('SignInUser Error');
+        console.log(error)
+        return res.status(404).send('SignInUser Error')
     }
 }
 
 //########### Sign Up ############//
-const signUpUser = (req, res) => {
+const signUpUser = async (req, res) => {
     try {
-        const { username, password, role } = req.body;
+        const { username, password, role } = req.body
 
         //* check is user is present or not
-        const existingUser = jsonData.find(item => username === item.username)
+        const existingUser = await Users.findOne({ username: username })
         if (existingUser) {
-            return res.status(409).json({ error: 'Username already exists' });
+            return messaging(res, statuscode.statusSuccess, messages.alreadyRegisteredUser)
         }
 
         //* add new user to the json file
-        const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+        const passwordHash = createHash(password)
         const newUser = {
-            id: Date.now(),
+            // id: Date.now(),
             username: username,
             password: passwordHash,
             role: role
         }
 
-        jsonData.push(newUser);
-        fs.writeFileSync('D:/Yudiz_Solution_Task/database/userdata.json', JSON.stringify(jsonData))
+        //* create new user in the document
+        const user = await Users.create(newUser)
+        console.log('USER>>>>', user)
+        if(user)
+            return messaging(res, statuscode.statusSuccess, messages.statusSuccess)
+            // return res.status(200).json({ message: messages.statusSuccess })
+        else
+            return messaging(statuscode.statusNotFound, messages.catch)
 
-        //* create JWT token 
-        const token = jwt.sign({ id: newUser.id, role: newUser.role }, config.app.secret_key, { expiresIn: '1h' });
-
-        return messaging(res, statuscode.statusSuccess, token)
     } catch (error) {
-        console.log(error);
-        return res.status(404).send('SignUpUser Error');
+        console.log('ERROR>>>>>>>',error)
+        return res.status(404).send('SignUpUser Error: ',error)
     }
 }
 
 //########### Delete User ############//
-const deleteUser = (req, res) => {
+const deleteUser = async (req, res) => {
     try {
-        const userId = parseInt(req.params.id);
+        const username = req.params.username
 
-        const userIndex = jsonData.findIndex(item => item.id === userId);
+        const user = await Users.deleteOne({ username: username })
 
-        if (userIndex != -1) {
-            //* delete from specific index
-            jsonData.splice(userIndex, userIndex);
-            fs.writeFileSync('D:/Yudiz_Solution_Task/database/userdata.json', JSON.stringify(jsonData))
-            return messaging(res, statuscode.statusNotFound, messages.statusSuccess);
+        if(user.deletedCount){
+            return messaging(res, statuscode.statusSuccess, 'Deleted Successfull')
         }
 
-        return messaging(res, statuscode.statusNotFound, messages.invalidCredentials);
+        return messaging(res, statuscode.statusNotFound, 'Username not found!!')
 
     } catch (error) {
-        console.log(error);
-        res.status(403).json({ msg: "Error in updateUser" })
+        console.log(error)
+        res.status(403).json({ msg: 'Error in updateUser' })
     }
 }
 

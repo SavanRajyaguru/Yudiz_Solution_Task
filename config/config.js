@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config()
 
 // SET NODE_ENV=development
 // for the env 
@@ -7,7 +7,9 @@ require('dotenv').config();
 const config = {
     app: {
         port: process.env.PORT || 4040,
-        secret_key: process.env.SECRET_KEY || 'crash'
+        secret_key: process.env.SECRET_KEY || 'crash',
+        expireIn: '1h',
+        dburl: process.env.DB_URL || '',
     }
 }
 

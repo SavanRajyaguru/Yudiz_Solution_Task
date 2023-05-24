@@ -1,12 +1,13 @@
-let jsonData = require('../database/userdata.json')
-const { statuscode, messages } = require("./messages.utils")
-const { messaging } = require("./messaging.utils")
+const { statuscode, messages } = require('./messages.utils')
+const { messaging } = require('./messaging.utils')
+const Users = require('../schemas/user.schemas')
 
 
 //============= Authorize Admin ===========//
-const isAuthorizedAdmin = (req, res, next) => {
-    const admin = jsonData.find(item => item.id === req.decoded.id)
+const isAuthorizedAdmin = async (req, res, next) => {
+    // const admin = jsonData.find(item => item.id === req.decoded.id)
 
+    const admin = await Users.findOne({ _id: req.decoded.id })
     if (!admin) {
         return messaging(res, statuscode.unAuthorized, messages.unAuthorized)
     }
@@ -18,8 +19,8 @@ const isAuthorizedAdmin = (req, res, next) => {
 
 
 //=============== Authorize User ==========//
-const isAuthorizedUser = (req, res, next) => {
-    const user = jsonData.find(item => item.id === req.decoded.id)
+const isAuthorizedUser = async (req, res, next) => {
+    const user = await Users.findOne({ _id: req.decoded.id })
 
     if (!user) {
         return messaging(res, statuscode.unAuthorized, messages.unAuthorized)

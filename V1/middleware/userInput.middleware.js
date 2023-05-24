@@ -10,7 +10,7 @@ class Validation {
             console.log('PASS>>>>', passwordRegex.test(req.body.password));
 
             if (passwordRegex.test(req.body.password)
-                || userRegex.test(req.body.username)) {
+                && userRegex.test(req.body.username)) {
                 // jsonData.push({ id: req.body.id, username: req.body.username, password: req.body.password })
                 next();
             } else {

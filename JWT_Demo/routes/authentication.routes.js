@@ -1,10 +1,10 @@
-const express = require('express');
-const { getUser, signUpUser, signInUser, updateUser, deleteUser } = require('../controller/auth.controllers');
-const { messaging } = require('../../utils/messaging.utils');
-const { messages, statuscode } = require('../../utils/messages.utils');
-const { isAuthorizedAdmin, isAuthorizedUser } = require('../../utils/checkauthorize.utils');
-const { authToken } = require('../../utils/checktoken.utils');
-const router = express.Router();
+const express = require('express')
+const { getUser, signUpUser, signInUser, updateUser, deleteUser } = require('../controller/auth.controllers')
+const { messaging } = require('../../utils/messaging.utils')
+const { messages, statuscode } = require('../../utils/messages.utils')
+const { isAuthorizedAdmin, isAuthorizedUser } = require('../../utils/checkauthorize.utils')
+const { authToken } = require('../../utils/checktoken.utils')
+const router = express.Router()
 
 
 router
@@ -12,17 +12,17 @@ router
     .post('/signin', signInUser)
     .get('/getuser', getUser)
     .put('/update', authToken, isAuthorizedUser, updateUser)
-    .delete('/delete/:id', authToken, isAuthorizedAdmin, deleteUser)
+    .delete('/delete/:username', authToken, isAuthorizedAdmin, deleteUser)
 
 
 
 //* test for the JWT  
 router.get('/protected', authToken, isAuthorizedAdmin, (req, res) => {
     return messaging(res, statuscode.statusSuccess, messages.statusSuccess)
-});
+})
 
 router.get('/user/protected', authToken, (req, res) => {
     return messaging(res, statuscode.statusSuccess, messages.statusSuccess)
-});
+})
 
-module.exports = router;
+module.exports = router
