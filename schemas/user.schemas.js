@@ -1,22 +1,18 @@
 const mongoose = require('mongoose')
 
 const uesrSchemas = mongoose.Schema({
-    // id: {
-    //     type: Number,
-    //     required: [true, 'Please add a id'],
-    // },
-    username: {
+    sUsername: {
         type: String,
         required: [true, 'Please add a username'],
     },
-    password: {
+    sPassword: {
         type: String,
         required: [true, 'Please add a password'],
     },
-    // role: {
-    //     type: String,
-    //     required: [true, 'Please add a role'],
-    // }
+    sRole: {
+        type: String,
+        required: [true, 'Please add a role'],
+    }
 })
 
 const Users = mongoose.model('Users', uesrSchemas)

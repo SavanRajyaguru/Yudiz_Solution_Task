@@ -10,6 +10,7 @@ const config = {
         secret_key: process.env.SECRET_KEY || 'crash',
         expireIn: '1h',
         dburl: process.env.DB_URL || '',
+        carDBUrl: process.env.CARSDB_URL || '',
     }
 }
 
