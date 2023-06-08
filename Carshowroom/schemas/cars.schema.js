@@ -12,6 +12,10 @@ const carSchema = Schema({
     iBrand_id: {
         type: Schema.Types.ObjectId,
         ref: 'brands'
+    },
+    nPrice: {
+        type: Number,
+        require: [true, 'Enter car price']
     }
 }, { timestamps: false })
 

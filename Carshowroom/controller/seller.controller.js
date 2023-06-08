@@ -72,6 +72,8 @@ const insertCars = async (req, res) => {
                 { $inc: { 'aCars.$.qty': car.qty } })
             
             console.log('IS CAR>>>>>>',isCar)
+
+            //* car is not present in the seller storage then add new car
             if(!isCar.modifiedCount){
                 const carsObj = {
                     carsId: carId._id,

@@ -20,7 +20,9 @@ const transactionSchema = new Schema({
         },
         qty: {
             type: Number,
-            default: 1
+        },
+        nTotalPrice: {
+            type: Number,
         }
     }
 }, { timestamps: true })

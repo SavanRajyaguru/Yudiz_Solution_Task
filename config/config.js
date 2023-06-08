@@ -9,7 +9,7 @@ const config = {
         port: process.env.PORT || 4040,
         secret_key: process.env.SECRET_KEY || 'crash',
         expireIn: '1h',
-        dburl: process.env.DB_URL || '',
+        DB_URL: process.env.DB_URL || '',
         carDBUrl: process.env.CARSDB_URL || '',
     }
 }

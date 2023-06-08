@@ -11,18 +11,22 @@ const authWithJWT = require('./JWT_Demo/routes/authentication.routes')
 const healthCheck = require('./helthcheck.routes')
 const languageDemo = require('./Internationalization/index')
 
-
-//* carshowroom task with Mongoose
-const carRoutes = require('./Carshowroom')
-
 app.use(cors())
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+
+//* Connect test database
 // connectDb()
 
 //* healthcheck route
 app.use('/healthcheck', healthCheck)
+
+//* carshowroom task with Mongoose
+const carRoutes = require('./Carshowroom')
+
+//* GridFs demo
+// app.use('/v1', require('./GridFS_Demo'))
 
 //* mongoose demo
 app.use('/api', carRoutes)

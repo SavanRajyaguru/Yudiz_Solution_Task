@@ -1,4 +1,7 @@
 const router = require('express').Router()
+const { isAuthorizedAdmin } = require('../utils/checkauthorize.utils')
+const { authToken } = require('../utils/checktoken.utils')
+const { adminAccessData } = require('./controller/admin.controller')
 const { loginModule } = require('./controller/login.controller')
 const connect = require('./database/dbconnect')
 const brandRoute = require('./routes/brand.routes')
@@ -8,6 +11,9 @@ const userRoute = require('./routes/user.routes')
 
 //* connect function for the DB
 connect()
+
+//* admin Route
+router.use('/admin', authToken, isAuthorizedAdmin, adminAccessData)
 
 //* Login Route
 router.use('/login', loginModule)

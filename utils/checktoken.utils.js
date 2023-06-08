@@ -21,7 +21,7 @@ const authToken = (req, res, next) => {
             next()
         })
     } catch (error) {
-        console.log('Checktoken utils', error)
+        console.log('Check token utils', error)
         return messaging(res, statuscode.pageNotFound, messages.catch)
     }
 }

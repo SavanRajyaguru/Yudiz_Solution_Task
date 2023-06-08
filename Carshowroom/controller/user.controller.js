@@ -37,7 +37,6 @@ const insertBuysCar = async(req, res) => {
         const seller = await Seller.findOne({ sName: sellername })
         const car = await Cars.findOne({ sCarName: carname })
 
-
         //* if car is not found
         if(!car){
             return messaging(res, statuscode.statusSuccess, 'Car is not found!')
@@ -49,31 +48,46 @@ const insertBuysCar = async(req, res) => {
             sCity: user.sCity,
             carDetails: {
                 carId: car._id,
-                qty: qty
+                qty: qty,
+                nTotalPrice: qty * car.nPrice
             }
         }
-        const isValid = await transaction.create(transObj)
-        if(isValid){
+        
+        if(car){
 
             //* update users cars count
             const isUserUpdate = await User.updateOne(
-                { sName: username },
-                { $push: { aCars: { carId: car._id, cName: carname, qty: qty } } }
+                { sName: username, 'aCars': { $elemMatch: { carId: car._id }} },
+                { $inc: { 'aCars.$.qty': qty } }
             )
 
-            if(isUserUpdate){
-                return messaging(res, statuscode.statusSuccess, 'Transaction Successful')
-            } else {
+            if(!isUserUpdate.modifiedCount){
+                //* when car is not exists 
+                const isNewCar = await User.updateOne(
+                    { sName: username },
+                    { $push: { aCars: { carId: car._id, cName: carname, qty: qty } } }
+                )
+                if(!isNewCar.modifiedCount){
+                    return messaging(res, statuscode.statusSuccess, 'Transaction Unsuccessful')
+                } 
+            }
                 //* update seller car count from database
-                const isSuccess = await Seller.updateOne(
-                    { 'aCars': { $elemMatch: { carsId: car._id } } },
+                const isSellerUpdate = await Seller.updateOne(
+                    { sName: sellername, 'aCars': { $elemMatch: { carsId: car._id } } },
                     { $inc: { 'aCars.$.qty': -qty } })
-                if(isSuccess){
-                    return messaging(res, statuscode.statusSuccess, 'Transaction Successful')
+
+                if(isUserUpdate.modifiedCount && isSellerUpdate.modifiedCount){
+                    const isSuccess = await transaction.create(transObj)
+                    
+                    if(isSuccess){
+                        return messaging(res, statuscode.statusSuccess, 'Transaction Successful')
+                    }
+
+                    return messaging(res, statuscode.statusSuccess, 'Transaction Unsuccessful')
                 } else {
                     return messaging(res, statuscode.statusSuccess, 'Transaction Unsuccessful')
                 }
-            }
+            
         }
         return messaging(res, statuscode.statusSuccess, 'Transaction Unsuccessful')
 

@@ -5,7 +5,7 @@ const Brand = require('../schemas/brand.schema')
 
 const insertCarsDetails = async (req, res) => {
     try {
-        const { name, modelNumber, brand } = req.body
+        const { name, modelNumber, brand, price } = req.body
 
         const brandId = await Brand.findOne({ sBrandName: brand })
 
@@ -16,7 +16,8 @@ const insertCarsDetails = async (req, res) => {
         const carsObj = {
             sCarName: name,
             nCarModel: modelNumber,
-            iBrand_id: brandId._id
+            iBrand_id: brandId._id,
+            nPrice: price
         }
 
         await Cars.create(carsObj)

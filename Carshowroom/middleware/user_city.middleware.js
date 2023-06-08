@@ -14,6 +14,11 @@ const isMatchedCity = async(req, res, next) => {
             return messaging(res, statuscode.statusSuccess, 'Seller is not found!')
         }
 
+        //* if user is not found
+        if(!userCity){
+            return messaging(res, statuscode.statusSuccess, 'User is not found!')
+        }
+
         return sellerCity.sCity === userCity.sCity 
             ? next()
             : messaging(res, statuscode.statusNotFound, 'Seller or city is does not match')
