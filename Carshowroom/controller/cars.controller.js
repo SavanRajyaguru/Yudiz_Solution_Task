@@ -5,11 +5,11 @@ const Brand = require('../schemas/brand.schema')
 
 const insertCarsDetails = async (req, res) => {
     try {
-        const { name, modelNumber, brand, price } = req.body
+        const { name, modelNumber, brandId, price } = req.body
 
-        const brandId = await Brand.findOne({ sBrandName: brand })
+        const isBrand = await Brand.findOne({ _id: brandId })
 
-        if(!brandId){
+        if(!isBrand){
             return messaging(res, statuscode.statusSuccess, 'Brand not found!!')
         }
 

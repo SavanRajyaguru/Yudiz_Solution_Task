@@ -8,6 +8,12 @@ const insertSellerDetails = async (req, res) => {
     try {
         const { sellername, city, cars } = req.body
 
+        //* if seller is exist
+        const isSeller = await Seller.findOne({ sName: sellername })
+        if(isSeller){
+            return messaging(res, statuscode.statusSuccess, 'Seller already registered')
+        }
+
         const sellerObj = {
             sName: sellername,
             sCity: city,
@@ -15,10 +21,10 @@ const insertSellerDetails = async (req, res) => {
         }
 
         for(let car of cars){
-            const carId = await Cars.findOne({ sCarName: car.name })
+            const carId = await Cars.findOne({ _id: car.carId })
             
             if(!carId){
-                return messaging(res, statuscode.statusSuccess, `${car.name} not found on cars!!`)
+                return messaging(res, statuscode.statusSuccess, `${carId.sCarName} not found on cars!!`)
             }
 
             const carsObj = {
@@ -48,10 +54,10 @@ const insertSellerDetails = async (req, res) => {
 //* Add more cars in storage
 const insertCars = async (req, res) => {
     try {
-        const { sellername, cars } = req.body
+        const { sellerId, cars } = req.body
 
         //* seller authentication
-        const isSeller = await Seller.findOne({ sName: sellername })
+        const isSeller = await Seller.findOne({ _id: sellerId })
         
         if(!isSeller){
             return messaging(res, statuscode.statusSuccess, 'Enter valid seller name')
@@ -60,15 +66,15 @@ const insertCars = async (req, res) => {
         const carArray = []
 
         for(let car of cars){
-            const carId = await Cars.findOne({ sCarName: car.name })
+            const carId = await Cars.findOne({ _id: car.carId })
             
             if(!carId){
-                return messaging(res, statuscode.statusSuccess, `${car.name} not found on cars!!`)
+                return messaging(res, statuscode.statusSuccess, 'Car not found on cars!!')
             }
 
             //* find the qty of existing cars 
             const isCar = await Seller.updateOne(
-                { sName: sellername, 'aCars': { $elemMatch: { carsId: carId._id }} }, 
+                { _id: sellerId, 'aCars': { $elemMatch: { carsId: carId._id }} }, 
                 { $inc: { 'aCars.$.qty': car.qty } })
             
             console.log('IS CAR>>>>>>',isCar)
@@ -83,7 +89,7 @@ const insertCars = async (req, res) => {
             }
         }
 
-        await Seller.updateOne({ sName: sellername }, { $push: { aCars: { $each: carArray } } })
+        await Seller.updateOne({ _id: sellerId }, { $push: { aCars: { $each: carArray } } })
             .then(() => {
                 return messaging(res, statuscode.statusSuccess, 'Inserted Successfully')
             }).catch((err) => {

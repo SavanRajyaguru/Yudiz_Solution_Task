@@ -31,11 +31,11 @@ const insetUserDetails = async (req, res) => {
 
 const insertBuysCar = async(req, res) => {
     try {
-        const { username, sellername, carname, qty } = req.body
+        const { userId, sellerId, carId, qty } = req.body
 
-        const user = await User.findOne({ sName: username })
-        const seller = await Seller.findOne({ sName: sellername })
-        const car = await Cars.findOne({ sCarName: carname })
+        const user = await User.findOne({ _id: userId })
+        const seller = await Seller.findOne({ _id: sellerId })
+        const car = await Cars.findOne({ _id: carId })
 
         //* if car is not found
         if(!car){
@@ -57,15 +57,15 @@ const insertBuysCar = async(req, res) => {
 
             //* update users cars count
             const isUserUpdate = await User.updateOne(
-                { sName: username, 'aCars': { $elemMatch: { carId: car._id }} },
+                { _id: userId, 'aCars': { $elemMatch: { carId: car._id }} },
                 { $inc: { 'aCars.$.qty': qty } }
             )
 
             if(!isUserUpdate.modifiedCount){
                 //* when car is not exists 
                 const isNewCar = await User.updateOne(
-                    { sName: username },
-                    { $push: { aCars: { carId: car._id, cName: carname, qty: qty } } }
+                    { _id: userId },
+                    { $push: { aCars: { carId: car._id, cName: car.sCarName, qty: qty } } }
                 )
                 if(!isNewCar.modifiedCount){
                     return messaging(res, statuscode.statusSuccess, 'Transaction Unsuccessful')
@@ -73,7 +73,7 @@ const insertBuysCar = async(req, res) => {
             }
                 //* update seller car count from database
                 const isSellerUpdate = await Seller.updateOne(
-                    { sName: sellername, 'aCars': { $elemMatch: { carsId: car._id } } },
+                    { _id: sellerId, 'aCars': { $elemMatch: { carsId: car._id } } },
                     { $inc: { 'aCars.$.qty': -qty } })
 
                 if(isUserUpdate.modifiedCount && isSellerUpdate.modifiedCount){

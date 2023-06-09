@@ -5,9 +5,9 @@ const User = require('../schemas/users.schema')
 
 const isMatchedCity = async(req, res, next) => {
     try {
-        const { username, sellername } = req.body
-        const sellerCity = await Seller.findOne({ sName: sellername })
-        const userCity = await User.findOne({ sName: username })
+        const { userId, sellerId } = req.body
+        const sellerCity = await Seller.findOne({ _id: sellerId })
+        const userCity = await User.findOne({ _id: userId })
 
         //* if seller is not found
         if(!sellerCity){
