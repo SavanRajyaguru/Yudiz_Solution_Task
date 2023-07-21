@@ -165,6 +165,34 @@ const showDetails = async (req, res) => {
         // c) Which car is sold the most
         // d) Which Brand's cars are most sold
         //* query fullFill all the above query
+
+        const totalCarSold = await Transaction.findOne({
+            attributes: [
+                [sequelize.fn('count', '*'), 'TotalSoldCar']
+            ],
+        })
+        // console.log(totalCarSold)
+
+        const cityMostSold = await Transaction.findOne({
+            attributes: [
+                'seller.sCity',
+                [sequelize.fn('count', sequelize.col('carId')), 'Most_car_sold']
+            ],
+            include: [
+                {
+                    model: Seller,
+                    attributes: [
+                        'sCity'
+                    ],
+                    
+                }
+            ],
+            group: ['seller.sCity'],
+            order: [
+                [sequelize.fn('count', sequelize.col('carId')), 'DESC']
+            ],
+        })
+        
         const dataOfCars = await Transaction.findOne({
             attributes: [
                 'carId',
@@ -192,8 +220,14 @@ const showDetails = async (req, res) => {
                 [sequelize.fn('count', sequelize.col('carId')), 'DESC']
             ],
         })
+
+        const requiredData = {
+            TotalCarSold: totalCarSold.getDataValue('TotalSoldCar'),
+            City: cityMostSold,
+            CarsData: dataOfCars
+        }
         // console.log(dataOfCars)
-        return messaging(res, statuscode.statusSuccess, dataOfCars)
+        return messaging(res, statuscode.statusSuccess, requiredData)
     } catch (error) {
         console.log(error)
         return messaging(res, statuscode.statusNotFound, error)
