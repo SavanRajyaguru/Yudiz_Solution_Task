@@ -5,11 +5,11 @@ const cors = require('cors')
 const logger = require('morgan')
 // const connectDb = require('./database/dbconnect')
 const config = require('./config/config')
-const versionOne = require('./V1/routes/v1.routes')
-const versionTwo = require('./V1/routes/v2.routes')
-const authWithJWT = require('./JWT_Demo/routes/authentication.routes')
+// const versionOne = require('./V1/routes/v1.routes')
+// const versionTwo = require('./V1/routes/v2.routes')
+// const authWithJWT = require('./JWT_Demo/routes/authentication.routes')
 const healthCheck = require('./helthcheck.routes')
-const languageDemo = require('./Internationalization/index')
+// const languageDemo = require('./Internationalization/index')
 
 app.use(cors())
 app.use(logger('dev'))
@@ -37,20 +37,20 @@ app.use('/api', carRoutes)
 // })
 
 //* v1 task
-app.use('/v1/login', versionOne)
+// app.use('/v1/login', versionOne)
 
 //* v2 task
-app.use('/v2/login', versionTwo)
+// app.use('/v2/login', versionTwo)
 
 //* JWT task
-app.use('/auth', authWithJWT)
+// app.use('/auth', authWithJWT)
 
 //* Internationalization 
-app.use('/inter', languageDemo)
+// app.use('/inter', languageDemo)
 
-//! for the test only
-// app.get('/test/:id', (req, res) => res.end(`Test with params ${req.params.id}`))
-// app.post('/test', (req, res) => res.end("Test without params"))
+//! for the test only with ? and without ? before id
+// app.get('/test/:id?', (req, res) => res.end(`Test with params ${req.params.id}`))
+// app.get('/test', (req, res) => res.end("Test without params"))
 
 
 //* If there is an error on all routes then default all 

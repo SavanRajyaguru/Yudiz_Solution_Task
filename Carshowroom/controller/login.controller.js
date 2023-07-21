@@ -11,7 +11,7 @@ const loginModule = async(req, res) => {
         const isUserExist = await User.findOne({ sName: username, sPassword: createHash(password) })
 
         if(!isUserExist){
-            return messaging(res, statuscode.statusSuccess, 'Username is not exists')
+            return messaging(res, statuscode.pageNotFound, 'Username is not exists')
         }
 
         const token = jwt.sign({ id: isUserExist._id, username: isUserExist.sName, role: isUserExist.sRole }, config.app.secret_key, { expiresIn: config.app.expireIn })

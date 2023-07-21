@@ -1,47 +1,57 @@
 const { statuscode } = require('../../utils/messages.utils')
 const { messaging } = require('../../utils/messaging.utils')
-const Cars = require('../schemas/cars.schema')
-const Seller = require('../schemas/sellers.schema')
+// const Cars = require('../schemas/cars.schema')
+// const Seller = require('../schemas/sellers.schema')
+const createHash = require('../../utils/createhash.utils')
+const { Seller } = require('../sequelize_models/index')
 
 //* insert Seller Details
 const insertSellerDetails = async (req, res) => {
     try {
-        const { sellername, city, cars } = req.body
+        // const { sellername, city, cars } = req.body
 
-        //* if seller is exist
-        const isSeller = await Seller.findOne({ sName: sellername })
-        if(isSeller){
-            return messaging(res, statuscode.statusSuccess, 'Seller already registered')
-        }
+        // //* if seller is exist
+        // const isSeller = await Seller.findOne({ sName: sellername })
+        // if(isSeller){
+        //     return messaging(res, statuscode.statusSuccess, 'Seller already registered')
+        // }
 
-        const sellerObj = {
-            sName: sellername,
-            sCity: city,
-            aCars: []
-        }
+        // const sellerObj = {
+        //     sName: sellername,
+        //     sCity: city,
+        //     aCars: []
+        // }
 
-        for(let car of cars){
-            const carId = await Cars.findOne({ _id: car.carId })
+        // for(let car of cars){
+        //     const carId = await Cars.findOne({ _id: car.carId })
             
-            if(!carId){
-                return messaging(res, statuscode.statusSuccess, `${carId.sCarName} not found on cars!!`)
-            }
+        //     if(!carId){
+        //         return messaging(res, statuscode.statusSuccess, `${carId.sCarName} not found on cars!!`)
+        //     }
 
-            const carsObj = {
-                carsId: carId._id,
-                qty: car.qty
-            }
-            sellerObj.aCars.push(carsObj)
-        }
+        //     const carsObj = {
+        //         carsId: carId._id,
+        //         qty: car.qty
+        //     }
+        //     sellerObj.aCars.push(carsObj)
+        // }
 
-        console.log(sellerObj) 
+        // console.log(sellerObj) 
 
-        await Seller.create(sellerObj)
-            .then((result) => {
-                return messaging(res, statuscode.statusSuccess, result)
-            }).catch((err) => {
-                return messaging(res, statuscode.statusSuccess, err._message)
-            })
+        // await Seller.create(sellerObj)
+        //     .then((result) => {
+        //         return messaging(res, statuscode.statusSuccess, result)
+        //     }).catch((err) => {
+        //         return messaging(res, statuscode.statusSuccess, err._message)
+        //     })
+        
+        //* Sequelize code...
+        const isUserExist = await Seller.findOne({ where: { sUsername: req.body.sUsername } })
+        if (!isUserExist) return messaging(res, statuscode.statusSuccess, 'User already exists')
+        
+        req.body.sPassword = createHash(req.body.sPassword)
+        const isSeller = await Seller.create(req.body)
+        return messaging(res, statuscode.statusSuccess, isSeller)
         
 
     } catch (error) {
