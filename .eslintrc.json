@@ -12,7 +12,8 @@
     "rules": {
         "linebreak-style": [
             "error",
-            "windows"
+            "windows",
+            "never"
         ],
         "quotes": [
             "error",

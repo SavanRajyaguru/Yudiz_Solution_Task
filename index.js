@@ -3,33 +3,42 @@ const app = express()
 const cors = require('cors')
 // const cron = require('node-cron')
 const logger = require('morgan')
-// const connectDb = require('./database/dbconnect')
+const connectDb = require('./database/dbconnect')
 const config = require('./config/config')
 // const versionOne = require('./V1/routes/v1.routes')
 // const versionTwo = require('./V1/routes/v2.routes')
 // const authWithJWT = require('./JWT_Demo/routes/authentication.routes')
 const healthCheck = require('./helthcheck.routes')
 // const languageDemo = require('./Internationalization/index')
+const redisDb = require('./Redis/dbconnect')
+const redisRoute = require('./Redis/routes')
 
 app.use(cors())
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
+//* connect redis
+redisDb.redisClient
+// redisDb.testCommands()
+// redisDb.subscriber()
+
+app.use('/api-redis', redisRoute)
+
 //* Connect test database
-// connectDb()
+connectDb()
 
 //* healthcheck route
 app.use('/healthcheck', healthCheck)
 
 //* carshowroom task with Mongoose
-const carRoutes = require('./Carshowroom')
+// const carRoutes = require('./Carshowroom')
 
 //* GridFs demo
 // app.use('/v1', require('./GridFS_Demo'))
 
 //* mongoose demo
-app.use('/api', carRoutes)
+// app.use('/api', carRoutes)
 
 //* cron demo task
 // cron.schedule('*/5 * * * * *', () => {
